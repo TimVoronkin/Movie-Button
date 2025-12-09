@@ -7,6 +7,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const rezkaSelect = document.getElementById('rezkaSelect');
     const torrentSelect = document.getElementById('torrentSelect');
 
+    const rezkaEnabledCb = document.getElementById('rezkaEnabled');
+    const torrentEnabledCb = document.getElementById('torrentEnabled');
+
+    const rezkaControls = document.getElementById('rezkaControls');
+    const torrentControls = document.getElementById('torrentControls');
+
     const editRezkaBtn = document.getElementById('editRezkaBtn');
     const editTorrentBtn = document.getElementById('editTorrentBtn');
 
@@ -22,8 +28,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Storage Keys
     const KEYS = {
-        rezka: { list: 'rezkaDomainList', current: 'rezkaDomain', defaultFile: 'default-configs/rezka-domains-default.txt' },
-        torrent: { list: 'torrentLinkList', current: 'torrentLink', defaultFile: 'default-configs/torrents-links-default.txt' }
+        rezka: {
+            list: 'rezkaDomainList',
+            current: 'rezkaDomain',
+            enabled: 'rezkaEnabled',
+            defaultFile: 'default-configs/rezka-domains-default.txt'
+        },
+        torrent: {
+            list: 'torrentLinkList',
+            current: 'torrentLink',
+            enabled: 'torrentEnabled',
+            defaultFile: 'default-configs/torrents-links-default.txt'
+        }
     };
 
     function showStatus(msg) {
@@ -53,9 +69,23 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    function toggleSection(type, isEnabled) {
+        const controls = type === 'rezka' ? rezkaControls : torrentControls;
+        const cb = type === 'rezka' ? rezkaEnabledCb : torrentEnabledCb;
+
+        // Update checkbox visual if called programmatically
+        cb.checked = isEnabled;
+
+        if (isEnabled) {
+            controls.classList.remove('disabled');
+        } else {
+            controls.classList.add('disabled');
+        }
+    }
+
     async function loadData() {
         // Load Rezka
-        chrome.storage.local.get([KEYS.rezka.list, KEYS.rezka.current], async (res) => {
+        chrome.storage.local.get([KEYS.rezka.list, KEYS.rezka.current, KEYS.rezka.enabled], async (res) => {
             let list = res[KEYS.rezka.list];
             if (!list || list.length === 0) {
                 list = await getDefaultList(KEYS.rezka.defaultFile);
@@ -66,11 +96,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 current = list[0];
                 chrome.storage.local.set({ [KEYS.rezka.current]: current });
             }
+
+            let enabled = res[KEYS.rezka.enabled];
+            // Default to true if undefined
+            if (enabled === undefined) enabled = true;
+
             populateSelect(rezkaSelect, list, current);
+            toggleSection('rezka', enabled);
         });
 
         // Load Torrent
-        chrome.storage.local.get([KEYS.torrent.list, KEYS.torrent.current], async (res) => {
+        chrome.storage.local.get([KEYS.torrent.list, KEYS.torrent.current, KEYS.torrent.enabled], async (res) => {
             let list = res[KEYS.torrent.list];
             if (!list || list.length === 0) {
                 list = await getDefaultList(KEYS.torrent.defaultFile);
@@ -81,7 +117,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 current = list[0];
                 chrome.storage.local.set({ [KEYS.torrent.current]: current });
             }
+
+            let enabled = res[KEYS.torrent.enabled];
+            if (enabled === undefined) enabled = true;
+
             populateSelect(torrentSelect, list, current);
+            toggleSection('torrent', enabled);
         });
     }
 
@@ -92,6 +133,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     torrentSelect.addEventListener('change', () => {
         chrome.storage.local.set({ [KEYS.torrent.current]: torrentSelect.value }, () => showStatus('Saved!'));
+    });
+
+    // Handlers for Checkboxes
+    rezkaEnabledCb.addEventListener('change', () => {
+        const isEnabled = rezkaEnabledCb.checked;
+        toggleSection('rezka', isEnabled);
+        chrome.storage.local.set({ [KEYS.rezka.enabled]: isEnabled }, () => showStatus('Saved!'));
+    });
+
+    torrentEnabledCb.addEventListener('change', () => {
+        const isEnabled = torrentEnabledCb.checked;
+        toggleSection('torrent', isEnabled);
+        chrome.storage.local.set({ [KEYS.torrent.enabled]: isEnabled }, () => showStatus('Saved!'));
     });
 
     // EDIT UI LOGIC

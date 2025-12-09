@@ -3,15 +3,21 @@ let currentRezkaDomain = 'rezka.ag';
 let currentTorrentLink = 'toloka.to/tracker.php?nm=';
 let rezkaList = [];
 let torrentList = [];
+let isRezkaEnabled = true;
+let isTorrentEnabled = true;
 let isSettingsLoaded = false;
 
 // Function to update settings from storage
 function initialize() {
-    chrome.storage.local.get(['rezkaDomain', 'torrentLink', 'rezkaDomainList', 'torrentLinkList'], (result) => {
+    chrome.storage.local.get(['rezkaDomain', 'torrentLink', 'rezkaDomainList', 'torrentLinkList', 'rezkaEnabled', 'torrentEnabled'], (result) => {
         if (result.rezkaDomain) currentRezkaDomain = result.rezkaDomain;
         if (result.torrentLink) currentTorrentLink = result.torrentLink;
         if (result.rezkaDomainList) rezkaList = result.rezkaDomainList;
         if (result.torrentLinkList) torrentList = result.torrentLinkList;
+
+        if (result.rezkaEnabled !== undefined) isRezkaEnabled = result.rezkaEnabled;
+        if (result.torrentEnabled !== undefined) isTorrentEnabled = result.torrentEnabled;
+
         isSettingsLoaded = true;
         refreshButtons();
     });
@@ -26,7 +32,12 @@ chrome.storage.onChanged.addListener((changes, namespace) => {
         if (changes.rezkaDomainList) { rezkaList = changes.rezkaDomainList.newValue; needsRefresh = true; }
         if (changes.torrentLinkList) { torrentList = changes.torrentLinkList.newValue; needsRefresh = true; }
 
+        if (changes.rezkaEnabled) { isRezkaEnabled = changes.rezkaEnabled.newValue; needsRefresh = true; }
+        if (changes.torrentEnabled) { isTorrentEnabled = changes.torrentEnabled.newValue; needsRefresh = true; }
+
         if (needsRefresh) {
+            // If we are disabling, we specifically want to remove them.
+            // refreshButtons logic handles addition, but we should clear strictly if toggle happened.
             const containers = document.querySelectorAll('.rezka-split-container');
             containers.forEach(c => c.remove());
             refreshButtons();
@@ -187,41 +198,52 @@ function refreshButtons() {
     if (!container) return;
 
     // REZKA
-    createSplitButton(
-        container,
-        'rezka-button',
-        'Find on Rezka',
-        'icon/rezka-logo_32.png',
-        '10',
-        rezkaList,
-        currentRezkaDomain,
-        'rezkaDomain',
-        (e) => {
-            e.preventDefault(); e.stopPropagation();
-            runSearch(currentRezkaDomain, title, year, false);
-        }
-    );
+    if (isRezkaEnabled) {
+        createSplitButton(
+            container,
+            'rezka-button',
+            'Find on Rezka',
+            'icon/rezka-logo_32.png',
+            '10',
+            rezkaList,
+            currentRezkaDomain,
+            'rezkaDomain',
+            (e) => {
+                e.preventDefault(); e.stopPropagation();
+                runSearch(currentRezkaDomain, title, year, false);
+            }
+        );
+    } else {
+        // Double check removal if it exists
+        const old = container.querySelector('[data-testid="rezka-button-container"]');
+        if (old) old.remove();
+    }
 
     // TORRENT
-    let tDomain = getDisplayDomain(currentTorrentLink);
-    let parts = tDomain.split('.');
-    let sld = parts.length >= 2 ? parts[parts.length - 2] : parts[0];
-    let displayName = sld.charAt(0).toUpperCase() + sld.slice(1);
+    if (isTorrentEnabled) {
+        let tDomain = getDisplayDomain(currentTorrentLink);
+        let parts = tDomain.split('.');
+        let sld = parts.length >= 2 ? parts[parts.length - 2] : parts[0];
+        let displayName = sld.charAt(0).toUpperCase() + sld.slice(1);
 
-    createSplitButton(
-        container,
-        'torrent-button',
-        `Find on ${displayName}`,
-        'icon/inbox-traypng_32.png',
-        '11',
-        torrentList,
-        currentTorrentLink,
-        'torrentLink',
-        (e) => {
-            e.preventDefault(); e.stopPropagation();
-            runSearch(currentTorrentLink, title, year, true);
-        }
-    );
+        createSplitButton(
+            container,
+            'torrent-button',
+            `Find on ${displayName}`,
+            'icon/inbox-traypng_32.png',
+            '11',
+            torrentList,
+            currentTorrentLink,
+            'torrentLink',
+            (e) => {
+                e.preventDefault(); e.stopPropagation();
+                runSearch(currentTorrentLink, title, year, true);
+            }
+        );
+    } else {
+        const old = container.querySelector('[data-testid="torrent-button-container"]');
+        if (old) old.remove();
+    }
 
     // STRICT ORDER
     const tContainer = container.querySelector('[data-testid="torrent-button-container"]');

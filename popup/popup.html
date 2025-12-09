@@ -14,22 +14,32 @@
     <div id="mainView">
         <!-- REZKA SECTION -->
         <div class="section">
-            <h3>Rezka Mirror</h3>
-            <div class="control-group">
-                <select id="rezkaSelect"></select>
+            <div class="header-row">
+                <input type="checkbox" id="rezkaEnabled" checked>
+                <h3>Rezka Mirror</h3>
             </div>
-            <button id="editRezkaBtn" class="secondary-btn small-btn">Edit Rezka List</button>
+            <div id="rezkaControls" class="content-row">
+                <div class="control-group">
+                    <select id="rezkaSelect"></select>
+                </div>
+                <button id="editRezkaBtn" class="secondary-btn small-btn">Edit Rezka List</button>
+            </div>
         </div>
 
         <hr>
 
         <!-- TORRENT SECTION -->
         <div class="section">
-            <h3>Torrent Tracker</h3>
-            <div class="control-group">
-                <select id="torrentSelect"></select>
+            <div class="header-row">
+                <input type="checkbox" id="torrentEnabled" checked>
+                <h3>Torrent Tracker</h3>
             </div>
-            <button id="editTorrentBtn" class="secondary-btn small-btn">Edit Torrent List</button>
+            <div id="torrentControls" class="content-row">
+                <div class="control-group">
+                    <select id="torrentSelect"></select>
+                </div>
+                <button id="editTorrentBtn" class="secondary-btn small-btn">Edit Torrent List</button>
+            </div>
         </div>
     </div>
 
