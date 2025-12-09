@@ -1,0 +1,17 @@
+/* Override class for the greenish background */
+.rezka-btn-custom {
+    background-color: #2e7d32 !important;
+    /* Dark Greenish */
+    color: #ffffff !important;
+    margin-top: 0.75rem;
+    /* Space it out if stacked */
+}
+
+.rezka-btn-custom:hover {
+    background-color: #1b5e20 !important;
+}
+
+/* Ensure SVG icon is white */
+.rezka-btn-custom svg {
+    fill: currentColor;
+}

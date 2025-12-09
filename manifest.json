@@ -1,0 +1,36 @@
+{
+    "manifest_version": 3,
+    "name": "Find on Rezka",
+    "version": "0.1",
+    "description": "Adds a button to IMDB pages to find the movie on Rezka.\nby Tim Voronkin",
+    "icons": {
+        "16": "icon/rezka-logo_16.png",
+        "32": "icon/rezka-logo_32.png",
+        "48": "icon/rezka-logo_48.png",
+        "128": "icon/rezka-logo_48.png"
+    },
+    "content_scripts": [
+        {
+            "matches": [
+                "https://www.imdb.com/title/*"
+            ],
+            "js": [
+                "content.js"
+            ],
+            "css": [
+                "styles.css"
+            ]
+        }
+    ],
+    "web_accessible_resources": [
+        {
+            "resources": [
+                "icon/rezka-logo_32.png",
+                "icon/rezka-logo_48.png"
+            ],
+            "matches": [
+                "https://*.imdb.com/*"
+            ]
+        }
+    ]
+}
