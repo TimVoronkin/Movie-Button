@@ -1,4 +1,4 @@
-![Extension Icon](icon/clapper2_512.png) Pirate Movie Button
+<img src="icon/clapper2_512.png" alt="Extension Icon" height="32"/> Pirate Movie Button
 ========================
 
 A Chrome extension that integrates directly with IMDb to help you find movies and TV shows on alternative streaming services and torrent trackers.
@@ -19,3 +19,11 @@ A Chrome extension that integrates directly with IMDb to help you find movies an
 3.  Enable **Developer mode** in the top right corner.
 4.  Click **Load unpacked**.
 5.  Select the `Movie-Button` folder.
+
+
+<!--
+Disclamer for Developers:
+
+I vibe-coded a lot.. like entire project made with help of Google Antigravity.
+So please dont be surprise if u see some weird code. It was the fastest solution.
+-->
