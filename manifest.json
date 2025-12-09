@@ -1,24 +1,25 @@
 {
     "manifest_version": 3,
-    "name": "Find on Rezka",
-    "version": "0.2",
-    "description": "Adds a button to IMDB movie page to find it on Rezka or on torrent trackers.\nby Tim Voronkin",
+    "name": "Pirate Movie Button",
+    "version": "0.3",
+    "description": "Adds a button to IMDB movie page to find this movie on Rezka and on torrent trackers websites. Made by Tim Voronkin",
     "permissions": [
         "storage"
     ],
     "action": {
         "default_popup": "popup.html",
         "default_icon": {
-            "16": "icon/rezka-logo_16.png",
-            "32": "icon/rezka-logo_32.png",
-            "48": "icon/rezka-logo_48.png"
+            "16": "icon/clapper2_32.png",
+            "32": "icon/clapper2_32.png",
+            "48": "icon/clapper2_32.png",
+            "128": "icon/clapper2_512.png"
         }
     },
     "icons": {
-        "16": "icon/rezka-logo_16.png",
-        "32": "icon/rezka-logo_32.png",
-        "48": "icon/rezka-logo_48.png",
-        "128": "icon/rezka-logo_48.png"
+        "16": "icon/clapper2_32.png",
+        "32": "icon/clapper2_32.png",
+        "48": "icon/clapper2_32.png",
+        "128": "icon/clapper2_512.png"
     },
     "content_scripts": [
         {

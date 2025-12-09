@@ -22,8 +22,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Storage Keys
     const KEYS = {
-        rezka: { list: 'rezkaDomainList', current: 'rezkaDomain', defaultFile: 'rezka-domains-default.txt' },
-        torrent: { list: 'torrentLinkList', current: 'torrentLink', defaultFile: 'torrents-links-default.txt' }
+        rezka: { list: 'rezkaDomainList', current: 'rezkaDomain', defaultFile: 'default-configs/rezka-domains-default.txt' },
+        torrent: { list: 'torrentLinkList', current: 'torrentLink', defaultFile: 'default-configs/torrents-links-default.txt' }
     };
 
     function showStatus(msg) {

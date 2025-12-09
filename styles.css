@@ -1,20 +1,97 @@
-/* Override class for the greenish background */
-.rezka-btn-custom {
+/* 
+   Styles for Native IMDB Split Button Classes Logic
+*/
+
+/* CONTAINER overrides */
+div.rezka-split-container.ipc-split-button {
     background-color: #2e7d32 !important;
-    /* Dark Greenish */
+    overflow: visible !important;
+    margin-top: 12px;
+}
+
+/* BUTTONS overrides */
+/* Main Button */
+button.rezka-btn-custom.ipc-split-button__btn {
+    background-color: #2e7d32 !important;
     color: #ffffff !important;
-    margin-top: 0.75rem;
-    /* Space it out if stacked */
     border: none !important;
     outline: none !important;
     box-shadow: none !important;
+
+    /* FORCE HEIGHT to match 'Add to Watchlist' visual weight */
+    min-height: 48px !important;
+
+    display: flex !important;
+    align-items: center !important;
+    padding-left: 16px !important;
+    /* Ensure generic padding matches */
 }
 
-.rezka-btn-custom:hover {
+/* Arrow Button */
+button.rezka-btn-custom.ipc-split-button__iconBtn {
+    background-color: #2e7d32 !important;
+    color: #ffffff !important;
+    border: none !important;
+
+    /* MATCH HEIGHT */
+    min-height: 48px !important;
+
+    /* Ensure arrow is centered */
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+/* Hovers */
+button.rezka-btn-custom:hover {
     background-color: #1b5e20 !important;
 }
 
-/* Ensure SVG icon is white */
-.rezka-btn-custom svg {
-    fill: currentColor;
+/* Icon Color */
+button.rezka-btn-custom svg {
+    fill: currentColor !important;
+}
+
+/* DROPDOWN */
+.rezka-dropdown-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    width: 100%;
+    min-width: 200px;
+    background-color: #121212 !important;
+    border: 1px solid #333 !important;
+    border-radius: 4px !important;
+    z-index: 1000 !important;
+    margin-top: 4px;
+
+    display: none;
+    flex-direction: column;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.7) !important;
+    padding: 4px 0;
+}
+
+.rezka-dropdown-menu.show {
+    display: flex !important;
+}
+
+.rezka-dropdown-item {
+    padding: 12px 16px !important;
+    color: #e0e0e0 !important;
+    text-decoration: none !important;
+    font-size: 14px !important;
+    cursor: pointer !important;
+    display: block !important;
+    text-align: left !important;
+    border-bottom: 1px solid #222 !important;
+    transition: background-color 0.1s;
+}
+
+.rezka-dropdown-item:last-child {
+    border-bottom: none !important;
+}
+
+.rezka-dropdown-item:hover {
+    background-color: #2e7d32 !important;
+    color: white !important;
 }
