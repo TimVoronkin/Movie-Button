@@ -1,3 +1,27 @@
+// Global variable to store current domain
+let currentRezkaDomain = 'rezka.ag'; // Default
+
+// Function to update domain from storage
+function updateDomain() {
+    chrome.storage.local.get(['rezkaDomain'], (result) => {
+        if (result.rezkaDomain) {
+            currentRezkaDomain = result.rezkaDomain;
+        }
+        // No need to explicitly re-run logic unless user is already on page, 
+        // button click will read the updated variable.
+    });
+}
+
+// Listen for storage changes
+chrome.storage.onChanged.addListener((changes, namespace) => {
+    if (namespace === 'local' && changes.rezkaDomain) {
+        currentRezkaDomain = changes.rezkaDomain.newValue;
+    }
+});
+
+// Load initial domain
+updateDomain();
+
 function addRezkaButton() {
     // 1. Find the container and reference button first
     const watchedButton = document.querySelector('[data-testid^="watched-button-"]');
@@ -9,9 +33,7 @@ function addRezkaButton() {
     // 2. Check if our button exists
     let button = document.querySelector('.rezka-button');
 
-    // 3. Logic to Parse Info (Do this only if we need to create or update the button)
-    // We can do this every time just to be safe or store it. 
-    // Let's parse.
+    // 3. Parse Info
     const titleElement = document.querySelector('.hero__primary-text');
     const title = titleElement ? titleElement.textContent.trim() : '';
 
@@ -23,6 +45,7 @@ function addRezkaButton() {
             const link = firstLi.querySelector('a');
             if (link && link.textContent) {
                 const text = link.textContent.trim();
+                // Check if it looks like a year (4 digits)
                 if (/^\d{4}$/.test(text)) {
                     year = text;
                     break;
@@ -78,7 +101,8 @@ function addRezkaButton() {
             e.preventDefault();
             e.stopPropagation();
             const query = encodeURIComponent(`${title} ${year}`);
-            const url = `https://rezka.ag/search/?do=search&subaction=search&q=${query}`;
+            // Use currentRezkaDomain global variable
+            const url = `https://${currentRezkaDomain}/search/?do=search&subaction=search&q=${query}`;
             window.open(url, '_blank');
         };
 
