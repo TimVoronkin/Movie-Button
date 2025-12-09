@@ -1,8 +1,8 @@
 {
     "manifest_version": 3,
     "name": "Find on Rezka",
-    "version": "1.2",
-    "description": "Adds a button to IMDB pages to find the movie on Rezka.\nby Tim Voronkin",
+    "version": "0.2",
+    "description": "Adds a button to IMDB movie page to find it on Rezka or on torrent trackers.\nby Tim Voronkin",
     "permissions": [
         "storage"
     ],
@@ -37,7 +37,8 @@
         {
             "resources": [
                 "icon/rezka-logo_32.png",
-                "icon/rezka-logo_48.png"
+                "icon/rezka-logo_48.png",
+                "icon/inbox-traypng_32.png"
             ],
             "matches": [
                 "https://*.imdb.com/*"

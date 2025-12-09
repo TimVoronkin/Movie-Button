@@ -7,25 +7,37 @@
 </head>
 
 <body>
-    <h3>Select Domain</h3>
 
     <div id="status"></div>
 
-    <!-- SELECT MODE -->
-    <div id="selectMode">
-        <div class="control-group">
-            <label for="domainSelect">Rezka Mirror:</label>
-            <select id="domainSelect">
-                <!-- Options populated by JS -->
-            </select>
+    <!-- MAIN VIEW -->
+    <div id="mainView">
+        <!-- REZKA SECTION -->
+        <div class="section">
+            <h3>Rezka Mirror</h3>
+            <div class="control-group">
+                <select id="rezkaSelect"></select>
+            </div>
+            <button id="editRezkaBtn" class="secondary-btn small-btn">Edit Rezka List</button>
         </div>
-        <button id="editBtn" class="secondary-btn">Edit List</button>
+
+        <hr>
+
+        <!-- TORRENT SECTION -->
+        <div class="section">
+            <h3>Torrent Tracker</h3>
+            <div class="control-group">
+                <select id="torrentSelect"></select>
+            </div>
+            <button id="editTorrentBtn" class="secondary-btn small-btn">Edit Torrent List</button>
+        </div>
     </div>
 
-    <!-- EDIT MODE -->
-    <div id="editMode" class="hidden">
-        <label for="domainsTextarea">One domain per line:</label>
-        <textarea id="domainsTextarea" rows="10"></textarea>
+    <!-- EDIT VIEW -->
+    <div id="editView" class="hidden">
+        <h3 id="editTitle">Edit List</h3>
+        <label for="editTextarea">One link per line:</label>
+        <textarea id="editTextarea" rows="10"></textarea>
 
         <div class="edit-controls">
             <button id="loadDefaultBtn" class="secondary-btn">Load Default</button>
