@@ -5,6 +5,9 @@
     color: #ffffff !important;
     margin-top: 0.75rem;
     /* Space it out if stacked */
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
 }
 
 .rezka-btn-custom:hover {
