@@ -4,7 +4,7 @@
 
 /* CONTAINER overrides */
 div.rezka-split-container.ipc-split-button {
-    background-color: #2e7d32 !important;
+    background-color: #BCF600 !important;
     overflow: visible !important;
     margin-top: 12px;
 }
@@ -12,8 +12,8 @@ div.rezka-split-container.ipc-split-button {
 /* BUTTONS overrides */
 /* Main Button */
 button.rezka-btn-custom.ipc-split-button__btn {
-    background-color: #2e7d32 !important;
-    color: #ffffff !important;
+    background-color: #BCF600 !important;
+    color: #000000 !important;
     border: none !important;
     outline: none !important;
     box-shadow: none !important;
@@ -29,8 +29,8 @@ button.rezka-btn-custom.ipc-split-button__btn {
 
 /* Arrow Button */
 button.rezka-btn-custom.ipc-split-button__iconBtn {
-    background-color: #2e7d32 !important;
-    color: #ffffff !important;
+    background-color: #BCF600 !important;
+    color: #000000 !important;
     border: none !important;
 
     /* MATCH HEIGHT */
@@ -44,7 +44,7 @@ button.rezka-btn-custom.ipc-split-button__iconBtn {
 
 /* Hovers */
 button.rezka-btn-custom:hover {
-    background-color: #1b5e20 !important;
+    background-color: #D4FF33 !important;
 }
 
 /* Icon Color */
@@ -92,6 +92,6 @@ button.rezka-btn-custom svg {
 }
 
 .rezka-dropdown-item:hover {
-    background-color: #2e7d32 !important;
-    color: white !important;
+    background-color: #BCF600 !important;
+    color: #000000 !important;
 }

@@ -82,7 +82,7 @@ document.addEventListener('click', (e) => {
     }
 });
 
-function createSplitButton(container, id, text, iconPath, order, listItems, currentItemValue, saveKey, onMainClick) {
+function createSplitButton(container, id, text, iconPath, order, listItems, currentItemValue, saveKey, onMainClick, onItemSelect) {
     let splitContainer = container.querySelector(`[data-testid="${id}-container"]`);
 
     if (!splitContainer) {
@@ -142,10 +142,32 @@ function createSplitButton(container, id, text, iconPath, order, listItems, curr
                 e.preventDefault();
                 e.stopPropagation();
                 chrome.storage.local.set({ [saveKey]: itemValue });
-                // Note: storage listener will trigger refresh
+                document.querySelectorAll('.rezka-dropdown-menu').forEach(m => m.classList.remove('show'));
+                if (onItemSelect) {
+                    onItemSelect(itemValue);
+                }
             };
             dropdown.appendChild(itemDiv);
         });
+
+        const settingsDiv = document.createElement('div');
+        settingsDiv.className = 'rezka-dropdown-item';
+        settingsDiv.textContent = '⚙️ Settings';
+        // settingsDiv.style.borderTop = '1px solid rgba(255,255,255,0.1)';
+        // settingsDiv.style.marginTop = '4px';
+        // settingsDiv.style.paddingTop = '8px';
+        // settingsDiv.style.color = 'rgba(255,255,255,0.5)';
+        settingsDiv.style.fontSize = '8px';
+        settingsDiv.style.fontWeight = 'normal';
+        settingsDiv.style.backgroundColor = '#222222';
+            
+        settingsDiv.onclick = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            document.querySelectorAll('.rezka-dropdown-menu').forEach(m => m.classList.remove('show'));
+            chrome.runtime.sendMessage({action: 'openSettings'});
+        };
+        dropdown.appendChild(settingsDiv);
 
         arrowBtn.onclick = (e) => {
             e.preventDefault();
@@ -203,7 +225,7 @@ function refreshButtons() {
             container,
             'rezka-button',
             'Find on Rezka',
-            'icon/rezka-logo_32.png',
+            'icon/icon_rezka_48.png',
             '10',
             rezkaList,
             currentRezkaDomain,
@@ -211,6 +233,9 @@ function refreshButtons() {
             (e) => {
                 e.preventDefault(); e.stopPropagation();
                 runSearch(currentRezkaDomain, title, year, false);
+            },
+            (itemValue) => {
+                runSearch(itemValue, title, year, false);
             }
         );
     } else {
@@ -230,7 +255,7 @@ function refreshButtons() {
             container,
             'torrent-button',
             `Find on ${displayName}`,
-            'icon/inbox-traypng_32.png',
+            'icon/icon_utorrent_50.svg',
             '11',
             torrentList,
             currentTorrentLink,
@@ -238,6 +263,9 @@ function refreshButtons() {
             (e) => {
                 e.preventDefault(); e.stopPropagation();
                 runSearch(currentTorrentLink, title, year, true);
+            },
+            (itemValue) => {
+                runSearch(itemValue, title, year, true);
             }
         );
     } else {

@@ -1,7 +1,7 @@
 {
     "manifest_version": 3,
     "name": "Pirate Movie Button",
-    "version": "0.4",
+    "version": "0.5",
     "description": "Adds a button to IMDB movie page to find this movie on Rezka and on torrent trackers websites. Made by Tim Voronkin",
     "permissions": [
         "storage"
@@ -9,17 +9,21 @@
     "action": {
         "default_popup": "popup/popup.html",
         "default_icon": {
-            "16": "icon/clapper2_32.png",
-            "32": "icon/clapper2_32.png",
-            "48": "icon/clapper2_32.png",
-            "128": "icon/clapper2_512.png"
+            "16": "icon/app-logo_32.png",
+            "32": "icon/app-logo_32.png",
+            "48": "icon/app-logo_32.png",
+            "128": "icon/app-logo_512.png"
         }
     },
     "icons": {
-        "16": "icon/clapper2_32.png",
-        "32": "icon/clapper2_32.png",
-        "48": "icon/clapper2_32.png",
-        "128": "icon/clapper2_512.png"
+        "16": "icon/app-logo_32.png",
+        "32": "icon/app-logo_32.png",
+        "48": "icon/app-logo_32.png",
+        "128": "icon/app-logo_512.png"
+    },
+    "options_page": "popup/popup.html",
+    "background": {
+        "service_worker": "background.js"
     },
     "content_scripts": [
         {
@@ -37,9 +41,8 @@
     "web_accessible_resources": [
         {
             "resources": [
-                "icon/rezka-logo_32.png",
-                "icon/rezka-logo_48.png",
-                "icon/inbox-traypng_32.png"
+                "icon/icon_rezka_48.png",
+                "icon/icon_utorrent_50.svg"
             ],
             "matches": [
                 "https://*.imdb.com/*"

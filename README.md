@@ -1,4 +1,4 @@
-<img src="icon/clapper2_512.png" alt="Extension Icon" height="32"/> Pirate Movie Button
+<img src="icon/app-logo_512.png" alt="Extension Icon" height="32"/> Pirate Movie Button
 ========================
 
 A Chrome extension that integrates directly with IMDb to help you find movies and TV shows on alternative streaming services and torrent trackers.

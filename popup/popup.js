@@ -235,4 +235,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initialize
     loadData();
+
+    // Show "Open in new tab" only if we are in the popup (not an existing tab)
+    chrome.tabs.getCurrent((tab) => {
+        if (tab === undefined) {
+            const openFullPageBtn = document.getElementById('openFullPageBtn');
+            if (openFullPageBtn) {
+                openFullPageBtn.classList.remove('hidden');
+                openFullPageBtn.addEventListener('click', () => {
+                    chrome.tabs.create({ url: 'popup/popup.html' });
+                    window.close(); // Close the popup
+                });
+            }
+        }
+    });
 });

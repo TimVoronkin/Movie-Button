@@ -8,10 +8,21 @@
 
 <body>
 
-    <div id="status"></div>
+    <header class="app-header">
+        <div class="header-content">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <img src="../icon/app-logo_32.png" alt="Logo" style="width: 20px; height: 20px; opacity: 0.9;">
+                <span class="app-title">Movie Button - settings</span>
+            </div>
+            <img id="openFullPageBtn" src="../icon/icon_open-in-new_24.svg" class="open-in-new-icon hidden" alt="Open Settings in New Tab" title="Open Settings in New Tab">
+        </div>
+    </header>
 
-    <!-- MAIN VIEW -->
-    <div id="mainView">
+    <main class="container">
+        <div id="status"></div>
+
+        <!-- MAIN VIEW -->
+        <div id="mainView">
         <!-- REZKA SECTION -->
         <div class="section">
             <div class="header-row">
@@ -22,7 +33,7 @@
                 <div class="control-group">
                     <select id="rezkaSelect"></select>
                 </div>
-                <button id="editRezkaBtn" class="secondary-btn small-btn">Edit Rezka List</button>
+                <button id="editRezkaBtn" class="primary-btn small-btn" style="margin-top: 8px;">Edit Rezka List</button>
             </div>
         </div>
 
@@ -38,7 +49,7 @@
                 <div class="control-group">
                     <select id="torrentSelect"></select>
                 </div>
-                <button id="editTorrentBtn" class="secondary-btn small-btn">Edit Torrent List</button>
+                <button id="editTorrentBtn" class="primary-btn small-btn" style="margin-top: 8px;">Edit Torrent List</button>
             </div>
         </div>
     </div>
@@ -57,7 +68,7 @@
             </div>
         </div>
         <div id="editError" class="error-msg"></div>
-    </div>
+    </main>
 
     <script src="popup.js"></script>
 </body>
