@@ -1,21 +1,54 @@
 // Global variables
 let currentRezkaDomain = 'rezka.ag';
+let currentMovieSearchLink = 'https://www.justwatch.com/uk/search?q=';
 let currentTorrentLink = 'toloka.to/tracker.php?nm=';
+
 let rezkaList = [];
+let movieSearchList = [];
 let torrentList = [];
+
 let isRezkaEnabled = true;
+let isMovieSearchEnabled = true;
 let isTorrentEnabled = true;
+
 let isSettingsLoaded = false;
 
 // Function to update settings from storage
 function initialize() {
-    chrome.storage.local.get(['rezkaDomain', 'torrentLink', 'rezkaDomainList', 'torrentLinkList', 'rezkaEnabled', 'torrentEnabled'], (result) => {
-        if (result.rezkaDomain) currentRezkaDomain = result.rezkaDomain;
-        if (result.torrentLink) currentTorrentLink = result.torrentLink;
-        if (result.rezkaDomainList) rezkaList = result.rezkaDomainList;
-        if (result.torrentLinkList) torrentList = result.torrentLinkList;
+    chrome.storage.local.get([
+        'rezkaDomain', 'torrentLink', 'movieSearchLink',
+        'rezkaDomainList', 'torrentLinkList', 'movieSearchLinkList',
+        'rezkaEnabled', 'torrentEnabled', 'movieSearchEnabled'
+    ], (result) => {
+        const defaultRezkaList = ['rezka.ag', 'hdrezka.ag', 'rezka-ua.tv', 'hdrezka.tv', 'rezka.so', 'hdrezka.co', 'hdrezka.sh', 'hdrezka.rest'];
+        const defaultMovieSearchList = [
+            'https://www.justwatch.com/uk/search?q=',
+            'https://www.justwatch.com/us/search?q=',
+            'https://www.justwatch.com/cz/vyhled%C3%A1n%C3%AD?q=',
+            'https://megogo.net/en/search-extended?q=',
+            'https://www.rottentomatoes.com/search?search=',
+            'https://ua.kinorium.com/search/?q='
+        ];
+        const defaultTorrentList = [
+            'toloka.to/tracker.php?nm=',
+            'tracker.0day.community/browse.php?search=',
+            'bluebird-hd.org/browse.php?search',
+            'thepiratebay.org/search.php?q',
+            'rutracker.org/forum/tracker.php?nm=',
+            'rutor.is/search/',
+            'nnmclub.to/forum/tracker.php?nm='
+        ];
+
+        rezkaList = result.rezkaDomainList || defaultRezkaList;
+        movieSearchList = result.movieSearchLinkList || defaultMovieSearchList;
+        torrentList = result.torrentLinkList || defaultTorrentList;
+
+        currentRezkaDomain = result.rezkaDomain || rezkaList[0];
+        currentMovieSearchLink = result.movieSearchLink || movieSearchList[0];
+        currentTorrentLink = result.torrentLink || torrentList[0];
 
         if (result.rezkaEnabled !== undefined) isRezkaEnabled = result.rezkaEnabled;
+        if (result.movieSearchEnabled !== undefined) isMovieSearchEnabled = result.movieSearchEnabled;
         if (result.torrentEnabled !== undefined) isTorrentEnabled = result.torrentEnabled;
 
         isSettingsLoaded = true;
@@ -28,11 +61,15 @@ chrome.storage.onChanged.addListener((changes, namespace) => {
     if (namespace === 'local') {
         let needsRefresh = false;
         if (changes.rezkaDomain) { currentRezkaDomain = changes.rezkaDomain.newValue; needsRefresh = true; }
+        if (changes.movieSearchLink) { currentMovieSearchLink = changes.movieSearchLink.newValue; needsRefresh = true; }
         if (changes.torrentLink) { currentTorrentLink = changes.torrentLink.newValue; needsRefresh = true; }
+
         if (changes.rezkaDomainList) { rezkaList = changes.rezkaDomainList.newValue; needsRefresh = true; }
+        if (changes.movieSearchLinkList) { movieSearchList = changes.movieSearchLinkList.newValue; needsRefresh = true; }
         if (changes.torrentLinkList) { torrentList = changes.torrentLinkList.newValue; needsRefresh = true; }
 
         if (changes.rezkaEnabled) { isRezkaEnabled = changes.rezkaEnabled.newValue; needsRefresh = true; }
+        if (changes.movieSearchEnabled) { isMovieSearchEnabled = changes.movieSearchEnabled.newValue; needsRefresh = true; }
         if (changes.torrentEnabled) { isTorrentEnabled = changes.torrentEnabled.newValue; needsRefresh = true; }
 
         if (needsRefresh) {
@@ -46,6 +83,35 @@ chrome.storage.onChanged.addListener((changes, namespace) => {
 });
 
 function getMovieInfo() {
+    // 1. Try to extract from structured JSON-LD data (most stable, immune to UI/CSS class changes)
+    try {
+        const jsonLdScripts = document.querySelectorAll('script[type="application/ld+json"]');
+        for (const script of jsonLdScripts) {
+            try {
+                const data = JSON.parse(script.textContent);
+                const objects = Array.isArray(data) ? data : (data['@graph'] ? data['@graph'] : [data]);
+                for (const obj of objects) {
+                    if (obj && (obj['@type'] === 'Movie' || obj['@type'] === 'TVSeries' || obj['@type'] === 'TVEpisode' || obj.name)) {
+                        let title = obj.name;
+                        let year = '';
+                        if (obj.datePublished) {
+                            const match = obj.datePublished.match(/^\d{4}/);
+                            if (match) year = match[0];
+                        }
+                        if (title) {
+                            return { title: title.trim(), year };
+                        }
+                    }
+                }
+            } catch (e) {
+                // Ignore individual script parse errors
+            }
+        }
+    } catch (e) {
+        console.error("Failed to query JSON-LD scripts:", e);
+    }
+
+    // 2. Fallback to DOM parsing
     const titleElement = document.querySelector('.hero__primary-text');
     const title = titleElement ? titleElement.textContent.trim() : '';
 
@@ -70,10 +136,46 @@ function getMovieInfo() {
     return { title, year };
 }
 
-function getDisplayDomain(link) {
+function getDisplayDomain(link, isRezka = false) {
     if (!link) return '';
-    let fullDomain = link.split('/')[0];
-    return fullDomain;
+    if (isRezka) return link;
+
+    let tempLink = link;
+    if (!tempLink.startsWith('http://') && !tempLink.startsWith('https://')) {
+        tempLink = 'https://' + tempLink;
+    }
+    try {
+        const url = new URL(tempLink);
+        let hostname = url.hostname;
+        if (hostname.startsWith('www.')) {
+            hostname = hostname.slice(4);
+        }
+        
+        let parts = hostname.split('.');
+        let sld = parts.length >= 2 ? parts[parts.length - 2] : parts[0];
+        let displayName = sld.charAt(0).toUpperCase() + sld.slice(1);
+        
+        let pathSegments = url.pathname.split('/').filter(p => p);
+        let countryCode = '';
+        if (pathSegments.length > 0 && pathSegments[0].length === 2) {
+            countryCode = pathSegments[0].toUpperCase();
+        }
+        
+        if (parts.length > 2) {
+            let firstSub = parts[0];
+            if (firstSub.length === 2) {
+                countryCode = firstSub.toUpperCase();
+            }
+        }
+        
+        if (countryCode) {
+            return `${displayName} (${countryCode})`;
+        }
+        return displayName;
+    } catch (e) {
+        let domain = link.split('/')[0];
+        return domain;
+    }
 }
 
 document.addEventListener('click', (e) => {
@@ -136,7 +238,7 @@ function createSplitButton(container, id, text, iconPath, order, listItems, curr
         listItems.forEach(itemValue => {
             const itemDiv = document.createElement('div');
             itemDiv.className = 'rezka-dropdown-item';
-            itemDiv.textContent = getDisplayDomain(itemValue);
+            itemDiv.textContent = getDisplayDomain(itemValue, id === 'rezka-button');
 
             itemDiv.onclick = (e) => {
                 e.preventDefault();
@@ -219,7 +321,7 @@ function refreshButtons() {
     const container = watchedButton.parentElement;
     if (!container) return;
 
-    // REZKA
+    // 1. REZKA
     if (isRezkaEnabled) {
         createSplitButton(
             container,
@@ -239,24 +341,46 @@ function refreshButtons() {
             }
         );
     } else {
-        // Double check removal if it exists
         const old = container.querySelector('[data-testid="rezka-button-container"]');
         if (old) old.remove();
     }
 
-    // TORRENT
+    // 2. MOVIE SEARCH (Streaming & Database)
+    if (isMovieSearchEnabled) {
+        let displayName = getDisplayDomain(currentMovieSearchLink, false);
+
+        createSplitButton(
+            container,
+            'moviesearch-button',
+            `Find on ${displayName}`,
+            'icon/icon_movie-search_48.svg',
+            '11',
+            movieSearchList,
+            currentMovieSearchLink,
+            'movieSearchLink',
+            (e) => {
+                e.preventDefault(); e.stopPropagation();
+                runSearch(currentMovieSearchLink, title, year, true);
+            },
+            (itemValue) => {
+                runSearch(itemValue, title, year, true);
+            }
+        );
+    } else {
+        const old = container.querySelector('[data-testid="moviesearch-button-container"]');
+        if (old) old.remove();
+    }
+
+    // 3. TORRENT
     if (isTorrentEnabled) {
-        let tDomain = getDisplayDomain(currentTorrentLink);
-        let parts = tDomain.split('.');
-        let sld = parts.length >= 2 ? parts[parts.length - 2] : parts[0];
-        let displayName = sld.charAt(0).toUpperCase() + sld.slice(1);
+        let displayName = getDisplayDomain(currentTorrentLink, false);
 
         createSplitButton(
             container,
             'torrent-button',
             `Find on ${displayName}`,
             'icon/icon_utorrent_50.svg',
-            '11',
+            '12',
             torrentList,
             currentTorrentLink,
             'torrentLink',
@@ -274,13 +398,19 @@ function refreshButtons() {
     }
 
     // STRICT ORDER
-    const tContainer = container.querySelector('[data-testid="torrent-button-container"]');
     const rContainer = container.querySelector('[data-testid="rezka-button-container"]');
+    const mContainer = container.querySelector('[data-testid="moviesearch-button-container"]');
+    const tContainer = container.querySelector('[data-testid="torrent-button-container"]');
 
     if (tContainer && container.lastElementChild !== tContainer) {
         container.appendChild(tContainer);
     }
-    if (rContainer && tContainer && tContainer.previousElementSibling !== rContainer) {
+    if (mContainer && tContainer && tContainer.previousElementSibling !== mContainer) {
+        container.insertBefore(mContainer, tContainer);
+    }
+    if (rContainer && mContainer && mContainer.previousElementSibling !== rContainer) {
+        container.insertBefore(rContainer, mContainer);
+    } else if (rContainer && tContainer && !mContainer && tContainer.previousElementSibling !== rContainer) {
         container.insertBefore(rContainer, tContainer);
     }
 }

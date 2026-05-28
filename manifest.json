@@ -1,8 +1,8 @@
 {
     "manifest_version": 3,
-    "name": "Pirate Movie Button",
-    "version": "0.5",
-    "description": "Adds a button to IMDB movie page to find this movie on Rezka and on torrent trackers websites. Made by Tim Voronkin",
+    "name": "Movie Button for IMDb",
+    "version": "0.6",
+    "description": "Adds customizable search buttons on IMDb movie and show pages to quickly search on external databases and indexes.",
     "permissions": [
         "storage"
     ],
@@ -42,7 +42,8 @@
         {
             "resources": [
                 "icon/icon_rezka_48.png",
-                "icon/icon_utorrent_50.svg"
+                "icon/icon_utorrent_50.svg",
+                "icon/icon_movie-search_48.svg"
             ],
             "matches": [
                 "https://*.imdb.com/*"

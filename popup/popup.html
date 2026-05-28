@@ -37,7 +37,19 @@
             </div>
         </div>
 
-        <hr>
+        <!-- MOVIE SEARCH SECTION -->
+        <div class="section">
+            <div class="header-row">
+                <input type="checkbox" id="movieSearchEnabled" checked>
+                <h3>Streaming & Database</h3>
+            </div>
+            <div id="movieSearchControls" class="content-row">
+                <div class="control-group">
+                    <select id="movieSearchSelect"></select>
+                </div>
+                <button id="editMovieSearchBtn" class="primary-btn small-btn" style="margin-top: 8px;">Edit Platforms List</button>
+            </div>
+        </div>
 
         <!-- TORRENT SECTION -->
         <div class="section">
@@ -57,7 +69,7 @@
     <!-- EDIT VIEW -->
     <div id="editView" class="hidden">
         <h3 id="editTitle">Edit List</h3>
-        <label for="editTextarea">One link per line:</label>
+        <label for="editTextarea" id="editInstructions">One link per line:</label>
         <textarea id="editTextarea" rows="10"></textarea>
 
         <div class="edit-controls">

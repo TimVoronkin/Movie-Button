@@ -5,15 +5,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const editView = document.getElementById('editView');
 
     const rezkaSelect = document.getElementById('rezkaSelect');
+    const movieSearchSelect = document.getElementById('movieSearchSelect');
     const torrentSelect = document.getElementById('torrentSelect');
 
     const rezkaEnabledCb = document.getElementById('rezkaEnabled');
+    const movieSearchEnabledCb = document.getElementById('movieSearchEnabled');
     const torrentEnabledCb = document.getElementById('torrentEnabled');
 
     const rezkaControls = document.getElementById('rezkaControls');
+    const movieSearchControls = document.getElementById('movieSearchControls');
     const torrentControls = document.getElementById('torrentControls');
 
     const editRezkaBtn = document.getElementById('editRezkaBtn');
+    const editMovieSearchBtn = document.getElementById('editMovieSearchBtn');
     const editTorrentBtn = document.getElementById('editTorrentBtn');
 
     const editTextarea = document.getElementById('editTextarea');
@@ -22,9 +26,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const cancelBtn = document.getElementById('cancelBtn');
     const saveBtn = document.getElementById('saveBtn');
     const editTitle = document.getElementById('editTitle');
+    const editInstructions = document.getElementById('editInstructions');
 
     // State needed for edit mode
-    let currentEditType = null; // 'rezka' or 'torrent'
+    let currentEditType = null; // 'rezka', 'movieSearch', or 'torrent'
 
     // Storage Keys
     const KEYS = {
@@ -32,19 +37,67 @@ document.addEventListener('DOMContentLoaded', () => {
             list: 'rezkaDomainList',
             current: 'rezkaDomain',
             enabled: 'rezkaEnabled',
-            defaultFile: 'default-configs/rezka-domains-default.txt'
+            defaultFile: 'default-configs/rezka-mirror-links-default.txt'
+        },
+        movieSearch: {
+            list: 'movieSearchLinkList',
+            current: 'movieSearchLink',
+            enabled: 'movieSearchEnabled',
+            defaultFile: 'default-configs/movie-streaming-links-default.txt'
         },
         torrent: {
             list: 'torrentLinkList',
             current: 'torrentLink',
             enabled: 'torrentEnabled',
-            defaultFile: 'default-configs/torrents-links-default.txt'
+            defaultFile: 'default-configs/torrent-tracker-links-default.txt'
         }
     };
 
     function showStatus(msg) {
         status.textContent = msg;
         setTimeout(() => { status.textContent = ''; }, 1500);
+    }
+
+    function getDisplayDomain(link, isRezka = false) {
+        if (!link) return '';
+        if (isRezka) return link;
+        
+        let tempLink = link;
+        if (!tempLink.startsWith('http://') && !tempLink.startsWith('https://')) {
+            tempLink = 'https://' + tempLink;
+        }
+        try {
+            const url = new URL(tempLink);
+            let hostname = url.hostname;
+            if (hostname.startsWith('www.')) {
+                hostname = hostname.slice(4);
+            }
+            
+            let parts = hostname.split('.');
+            let sld = parts.length >= 2 ? parts[parts.length - 2] : parts[0];
+            let displayName = sld.charAt(0).toUpperCase() + sld.slice(1);
+            
+            let pathSegments = url.pathname.split('/').filter(p => p);
+            let countryCode = '';
+            if (pathSegments.length > 0 && pathSegments[0].length === 2) {
+                countryCode = pathSegments[0].toUpperCase();
+            }
+            
+            if (parts.length > 2) {
+                let firstSub = parts[0];
+                if (firstSub.length === 2) {
+                    countryCode = firstSub.toUpperCase();
+                }
+            }
+            
+            if (countryCode) {
+                return `${displayName} (${countryCode})`;
+            }
+            return displayName;
+        } catch (e) {
+            let domain = link.split('/')[0];
+            return domain;
+        }
     }
 
     async function getDefaultList(filename) {
@@ -58,22 +111,30 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function populateSelect(element, items, selected) {
+    function populateSelect(element, items, selected, isRezka = false) {
         element.innerHTML = '';
         items.forEach(item => {
             const opt = document.createElement('option');
             opt.value = item;
-            opt.textContent = item;
+            opt.textContent = getDisplayDomain(item, isRezka);
             if (item === selected) opt.selected = true;
             element.appendChild(opt);
         });
     }
 
     function toggleSection(type, isEnabled) {
-        const controls = type === 'rezka' ? rezkaControls : torrentControls;
-        const cb = type === 'rezka' ? rezkaEnabledCb : torrentEnabledCb;
+        let controls, cb;
+        if (type === 'rezka') {
+            controls = rezkaControls;
+            cb = rezkaEnabledCb;
+        } else if (type === 'movieSearch') {
+            controls = movieSearchControls;
+            cb = movieSearchEnabledCb;
+        } else {
+            controls = torrentControls;
+            cb = torrentEnabledCb;
+        }
 
-        // Update checkbox visual if called programmatically
         cb.checked = isEnabled;
 
         if (isEnabled) {
@@ -98,11 +159,30 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             let enabled = res[KEYS.rezka.enabled];
-            // Default to true if undefined
             if (enabled === undefined) enabled = true;
 
-            populateSelect(rezkaSelect, list, current);
+            populateSelect(rezkaSelect, list, current, true);
             toggleSection('rezka', enabled);
+        });
+
+        // Load Movie Search
+        chrome.storage.local.get([KEYS.movieSearch.list, KEYS.movieSearch.current, KEYS.movieSearch.enabled], async (res) => {
+            let list = res[KEYS.movieSearch.list];
+            if (!list || list.length === 0) {
+                list = await getDefaultList(KEYS.movieSearch.defaultFile);
+                chrome.storage.local.set({ [KEYS.movieSearch.list]: list });
+            }
+            let current = res[KEYS.movieSearch.current];
+            if (!current || !list.includes(current)) {
+                current = list[0];
+                chrome.storage.local.set({ [KEYS.movieSearch.current]: current });
+            }
+
+            let enabled = res[KEYS.movieSearch.enabled];
+            if (enabled === undefined) enabled = true;
+
+            populateSelect(movieSearchSelect, list, current, false);
+            toggleSection('movieSearch', enabled);
         });
 
         // Load Torrent
@@ -121,7 +201,7 @@ document.addEventListener('DOMContentLoaded', () => {
             let enabled = res[KEYS.torrent.enabled];
             if (enabled === undefined) enabled = true;
 
-            populateSelect(torrentSelect, list, current);
+            populateSelect(torrentSelect, list, current, false);
             toggleSection('torrent', enabled);
         });
     }
@@ -129,6 +209,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // Handlers for Select Changes
     rezkaSelect.addEventListener('change', () => {
         chrome.storage.local.set({ [KEYS.rezka.current]: rezkaSelect.value }, () => showStatus('Saved!'));
+    });
+
+    movieSearchSelect.addEventListener('change', () => {
+        chrome.storage.local.set({ [KEYS.movieSearch.current]: movieSearchSelect.value }, () => showStatus('Saved!'));
     });
 
     torrentSelect.addEventListener('change', () => {
@@ -142,6 +226,12 @@ document.addEventListener('DOMContentLoaded', () => {
         chrome.storage.local.set({ [KEYS.rezka.enabled]: isEnabled }, () => showStatus('Saved!'));
     });
 
+    movieSearchEnabledCb.addEventListener('change', () => {
+        const isEnabled = movieSearchEnabledCb.checked;
+        toggleSection('movieSearch', isEnabled);
+        chrome.storage.local.set({ [KEYS.movieSearch.enabled]: isEnabled }, () => showStatus('Saved!'));
+    });
+
     torrentEnabledCb.addEventListener('change', () => {
         const isEnabled = torrentEnabledCb.checked;
         toggleSection('torrent', isEnabled);
@@ -151,19 +241,29 @@ document.addEventListener('DOMContentLoaded', () => {
     // EDIT UI LOGIC
     function openEdit(type) {
         currentEditType = type;
-        const selectEl = type === 'rezka' ? rezkaSelect : torrentSelect;
+        const selectEl = type === 'rezka' ? rezkaSelect : (type === 'movieSearch' ? movieSearchSelect : torrentSelect);
 
         // Populate textarea from current Select options because that's our source of truth for the visible list
         const options = Array.from(selectEl.options).map(o => o.value);
         editTextarea.value = options.join('\n');
         editError.textContent = '';
-        editTitle.textContent = type === 'rezka' ? 'Edit Rezka List' : 'Edit Torrent List';
+        if (type === 'rezka') {
+            editTitle.textContent = 'Edit Rezka List';
+            editInstructions.innerHTML = 'Enter one Rezka mirror domain per line. Protocols, paths, and "www." prefixes will be automatically stripped.';
+        } else if (type === 'movieSearch') {
+            editTitle.textContent = 'Edit Platforms List';
+            editInstructions.innerHTML = 'Enter one streaming/database search URL per line. The movie title and year will be appended directly to the end of the URL. Ensure the URL ends with a query parameter.';
+        } else {
+            editTitle.textContent = 'Edit Torrent List';
+            editInstructions.innerHTML = 'Enter one torrent tracker URL per line. The movie title and year will be appended directly to the end of the URL. Ensure the URL ends with a query parameter.';
+        }
 
         mainView.classList.add('hidden');
         editView.classList.remove('hidden');
     }
 
     editRezkaBtn.addEventListener('click', () => openEdit('rezka'));
+    editMovieSearchBtn.addEventListener('click', () => openEdit('movieSearch'));
     editTorrentBtn.addEventListener('click', () => openEdit('torrent'));
 
     cancelBtn.addEventListener('click', () => {
@@ -196,7 +296,32 @@ document.addEventListener('DOMContentLoaded', () => {
                 hasError = true;
                 break;
             }
-            validLines.push(line);
+
+            if (currentEditType === 'rezka') {
+                // Normalize Rezka to clean domain
+                let cleanDomain = line;
+                if (cleanDomain.includes('://')) {
+                    cleanDomain = cleanDomain.split('://')[1];
+                }
+                cleanDomain = cleanDomain.split('/')[0];
+                if (cleanDomain.startsWith('www.')) {
+                    cleanDomain = cleanDomain.slice(4);
+                }
+                cleanDomain = cleanDomain.split(':')[0]; // strip port
+                if (cleanDomain) {
+                    validLines.push(cleanDomain);
+                } else {
+                    hasError = true;
+                    break;
+                }
+            } else {
+                // Normalize Torrent & MovieSearch to full URL starting with protocol
+                let cleanUrl = line;
+                if (!cleanUrl.startsWith('http://') && !cleanUrl.startsWith('https://')) {
+                    cleanUrl = 'https://' + cleanUrl;
+                }
+                validLines.push(cleanUrl);
+            }
         }
 
         if (hasError) {
@@ -213,7 +338,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const keyConfig = KEYS[currentEditType];
         chrome.storage.local.set({ [keyConfig.list]: validLines }, () => {
             // Update current selection if invalidated
-            const selectEl = currentEditType === 'rezka' ? rezkaSelect : torrentSelect;
+            const selectEl = currentEditType === 'rezka' ? rezkaSelect : (currentEditType === 'movieSearch' ? movieSearchSelect : torrentSelect);
             const currentVal = selectEl.value;
             let newVal = currentVal;
 
@@ -223,7 +348,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             // Refresh select
-            populateSelect(selectEl, validLines, newVal);
+            populateSelect(selectEl, validLines, newVal, currentEditType === 'rezka');
 
             // Close UI
             editView.classList.add('hidden');
