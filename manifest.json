@@ -1,7 +1,7 @@
 {
     "manifest_version": 3,
     "name": "Movie Button for IMDb",
-    "version": "0.6",
+    "version": "1.0",
     "description": "Adds customizable search buttons on IMDb movie and show pages to quickly search on external databases and indexes.",
     "permissions": [
         "storage"
@@ -12,14 +12,14 @@
             "16": "icon/app-logo_32.png",
             "32": "icon/app-logo_32.png",
             "48": "icon/app-logo_32.png",
-            "128": "icon/app-logo_512.png"
+            "128": "icon/app-logo_128.png"
         }
     },
     "icons": {
         "16": "icon/app-logo_32.png",
         "32": "icon/app-logo_32.png",
         "48": "icon/app-logo_32.png",
-        "128": "icon/app-logo_512.png"
+        "128": "icon/app-logo_128.png"
     },
     "options_page": "popup/popup.html",
     "background": {
